@@ -1,0 +1,20 @@
+@import "../../../App.scss";
+
+.triangleIcon
+{
+    height: 100%;
+    width: 100%;
+    transform: rotate(-90deg);
+}
+
+.triangleIcon ellipse
+{
+    fill: white;
+}
+
+.triangleIcon path
+{
+    fill: var(--mainColor);
+    stroke: var(--mainColor);
+
+}

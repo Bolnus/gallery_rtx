@@ -1,0 +1,112 @@
+.listWrapper
+{
+    width: 100%;
+    border-top: 2px solid $subColorGrey;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    height: 0;
+}
+
+.albumBlock
+{
+    width: 100%;
+    flex-basis: calc(var(--fontSizeMedium) * 3);
+    height: calc(var(--fontSizeMedium) * 3);
+    max-height: calc(var(--fontSizeMedium) * 3);
+    border-top: 1px solid $subColorGrey;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: inherit;
+    transition: background 1s;
+}
+
+.albumBlock_notLast
+{
+    border-bottom: 1px solid $subColorGrey;
+}
+
+.albumBlock_current
+{
+    background: $subColorLightGrey;
+}
+
+.albumBlock:hover
+{
+    cursor: pointer;
+}
+
+.albumBlock div:hover
+{
+    cursor: pointer;
+}
+
+.albumBlock__contents
+{
+    flex-grow: 1;
+    max-width: 100%;
+    min-width: 0;
+}
+
+
+.albumBlock__header
+{
+    font-size: var(--fontSizeSmall);
+    color: var(--fontColorFirm);
+    width: 100%;
+    //height: var(--fontSizeSmall) * 2;
+    margin-top: var(--fontSizeSmall);
+
+    display: flex;
+    justify-content: space-between;
+}
+
+.albumBlock__name
+{
+    font-weight: bold;
+    color: var(--fontColorFirm);
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-block; //-block
+    //width: 80%;
+}
+
+.albumBlock__time
+{
+    color: var(--fontColorLight);
+    font-weight: lighter;
+    //float: right;
+    display: inline;
+    white-space: nowrap;
+    //text-overflow: ellipsis;
+    margin-right: 3px;
+    margin-left: 3px;
+    //justify-self: end;
+    width: auto;
+}
+
+.albumBlock__address
+{
+    font-size: var(--fontSizeSmall);
+    font-weight: lighter;
+    color: var(--fontColorLight);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: var(--fontSizeSmall);
+    max-width: 95%;
+    overflow: hidden;
+    //overflow: hidden;
+}
+
+.albumBlock__loader
+{
+    height: 32px;
+    margin: auto;
+    background: inherit;
+    display: block;
+    shape-rendering: auto;
+}

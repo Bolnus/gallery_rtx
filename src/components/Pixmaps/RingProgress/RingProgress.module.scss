@@ -1,0 +1,23 @@
+@import "../App.scss";
+
+.ringBlock
+{
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.ringBlock:hover
+{
+    cursor: pointer;
+}
+
+.bgRing
+{
+    stroke: grey;
+}
+
+.progressRing
+{
+    stroke: var(--mainColor);
+}

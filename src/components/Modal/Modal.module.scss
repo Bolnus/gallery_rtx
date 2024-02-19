@@ -1,0 +1,118 @@
+@import "../../App.scss";
+
+.portal
+{
+    position: relative;
+    z-index: 3;
+}
+
+.root
+{
+    background: rgba(0, 0, 0, 0.5);
+    bottom: 0;
+    height: 100%;
+    left: 0;
+    position: fixed;
+    right: 0;
+    //text-align: center;
+    top: 0;
+    white-space: nowrap;
+    width: 100%;
+    //z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scroll
+{
+    background: white;
+    //display: inline-block;
+    max-height: calc(100% - 4rem);
+    max-width: calc(100% - 4rem);
+    outline: none;
+    vertical-align: middle;
+    white-space: normal;
+}
+
+.modal
+{
+    text-align: center;
+    padding-top: 10px;
+    //height: 58px;
+    width: 90%;
+    max-width: 300px;
+    border-radius: 10px;
+    background: var(--bgColor); // #e8e8e8;
+    animation-duration: .5s;
+    animation-name: popin;
+    //margin: 50px auto auto;
+    opacity: 1;
+}
+
+.modal h4
+{
+    margin: 0 1rem 0 1rem;
+    white-space: pre-wrap;
+    color: var(--fontColorFirm);
+    font-size: var(--fontSizeMedium);
+}
+
+@keyframes popin
+{
+    from
+    {
+        //margin: 100px auto auto;
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to
+    {
+        //margin: 50px auto auto;
+    }
+}
+
+.modal__pb
+{
+    border-top: 1px solid gray;
+    display: inline-block;
+    margin-top: 11px;
+    padding: 5px 0;
+    box-sizing: border-box;
+    font-size: var(--fontSizeMedium);
+    color: var(--fontColorFirm);
+}
+
+.modal__pb_wide
+{
+    width: 100%;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.modal__pb_left
+{
+    float: left;
+    border-right: 1px solid gray;
+    border-bottom-left-radius: 10px;
+    width: 50%;
+}
+
+.modal__pb_right
+{
+    float: right;
+    //border-right: 1px solid gray;
+    border-bottom-right-radius: 10px;
+    width: 50%;
+
+}
+
+.modal__pb_normal
+{
+    background: var(--bgColor);
+}
+
+.modal__pb_alert
+{
+    background: $amadoRed;
+}

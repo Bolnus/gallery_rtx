@@ -1,0 +1,181 @@
+:root
+{
+    --mainColor: #70f6b9;
+    --bgColor: #f5f6fa;
+    --fontColorFirm: black;
+    --fontColorLight: grey;
+    --fontColorFirmGreen: #004422;
+    --darkToggleColor: grey;
+    --checkBoxColor: #ebcdb5;
+
+    --fontSizeSmall: 14px;
+    --fontSizeMedium: 20px;
+    --fontSizeBig: 26px;
+    --fontSizeLarge: 30px;
+    --fontSizeLargest: 40px;
+}
+
+@media all and (min-height: 1000px)
+{
+    :root
+    {
+        /*--fontSizeSmaller: 14px;*/
+        --fontSizeSmall: 20px;
+        --fontSizeMedium: 25px;
+        --fontSizeBig: 30px;
+        --fontSizeLarge: 40px;
+        --fontSizeLargest: 50px;
+    }
+}
+
+body
+{
+    background: var(--bgColor);
+    overflow: hidden;
+}
+
+$subColorGrey: #e3e4dd;
+$subColorLightGrey: #c4ccce;
+$bgColor: #f5f6fa;
+$fontColorLight: grey;
+$fontColorFirm: black;
+$mainColor: #ebcdb5;
+$appleGreen: #4ed164;
+$amadoRed: #f6a89e;
+
+
+
+.rootContent
+{
+    /*border: 1px solid #36383F;*/
+    /*border-radius: 20px;*/
+    width: 100%;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+    background-color: var(--bgColor);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+::-webkit-scrollbar
+{
+    background: var(--bgColor);
+}
+
+::-webkit-scrollbar-track
+{
+    background: var(--bgColor);
+    width: var(--fontSizeSmall);
+}
+
+::-webkit-scrollbar-thumb
+{
+    background: var(--mainColor);
+}
+
+.commonInput
+{
+    border: none;
+    outline: none;
+    background: $subColorGrey; //var(--subColorGrey);
+    color: black;
+    display: block;
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    min-height: 1.2em;
+    //padding: 3px;
+    //border-radius: 3px;
+}
+
+.commonInput:focus
+{
+    border: none;
+    outline: none;
+}
+
+.commonInput:disabled
+{
+    color: grey;
+}
+
+.pushButton
+{
+    border: none;
+}
+
+.pushButton_main
+{
+    background: var(--mainColor);
+    color: white;
+}
+
+.pushButton:hover
+{
+    cursor: pointer;
+}
+
+.pushButton:disabled
+{
+    opacity: 0.5;
+}
+
+.pushButtonAlt
+{
+    color: $amadoRed;
+    font-weight: bold;
+    border: none;
+    background: inherit;
+}
+
+.pushButtonAlt:hover
+{
+    cursor: pointer;
+    text-decoration: underline;
+    //background: var(--mainColor);
+    //color: white;
+}
+
+.pushButtonAlt:disabled
+{
+    opacity: 0.5;
+}
+
+.emptyComment
+{
+    font-weight: bold;
+    color: var(--fontColorFirm);
+    text-align: center;
+    white-space: nowrap;
+    //justify-self: center;
+}
+
+.slick-track
+{
+    height: 100%;
+}
+
+.slick-track .slick-slide
+{
+    height: 100%;
+}
+
+.slick-slider
+{
+    height: 100%;
+}
+
+.slick-list
+{
+    height: 100%;
+}
+
+.slick-slide > div
+{
+    height: 100%;
+}
+
+.emojiFont
+{
+    font-family: 'Noto Emoji', sans-serif;
+}

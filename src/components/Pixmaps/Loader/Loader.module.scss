@@ -1,0 +1,28 @@
+@import "../App.scss";
+
+.loader
+{
+    margin: auto;
+    background: inherit;
+    display: block;
+    shape-rendering: auto;
+    //height: 100%;
+
+    //box-sizing: border-box;
+}
+
+.loader_small
+{
+    height: 100px;
+}
+
+.loader_big
+{
+    height: 80%;
+}
+
+.loader__circle
+{
+    stroke: var(--mainColor);
+    //stroke-width: 14;
+}
