@@ -1,3 +1,5 @@
+import { DefinedTag } from "../../../api/apiTypes";
+
 export enum FileLoadState
 {
     added = 0,
@@ -25,7 +27,7 @@ export interface Album
   changedDate: string;
   picturesSnap: GalleryImage[];
   albumSize: number;
-  tags: string[];
+  tags: DefinedTag[];
 }
 
 export interface AlbumsListState
@@ -33,4 +35,6 @@ export interface AlbumsListState
   searchString: string;
   albums: Album[];
   isFetching: boolean;
+  totalCount: number;
+  searchTags: DefinedTag[];
 }

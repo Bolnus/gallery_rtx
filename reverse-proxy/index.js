@@ -47,14 +47,21 @@ function getHTTPConfig(req)
     {
         params[field] = value;
     }
-    //console.log(qs.stringify(params,{ format : 'RFC3986' }))
+
+    let acceptBasedHeader;
+    if (req.headers?.["accept"].includes("application/json"))
+        acceptBasedHeader = {};
+    else
+        acceptBasedHeader = {  responseType: "stream" }
 
     if(req.headers.hasOwnProperty("authorization")&&!isBasicAuth)
     {
         // console.log(req.headers.authorization)
         return {
             // params: params,
+            ...acceptBasedHeader,
             headers: {
+                
                 Authorization: req.headers.authorization
             }
         }
@@ -62,6 +69,7 @@ function getHTTPConfig(req)
     else if(isBasicAuth)
     {
         return {
+            ...acceptBasedHeader,
             // params: params
             auth: {
                 username: "Лазарев Сергей", //unescape(encodeURIComponent("Лазарев Сергей"))
@@ -69,14 +77,14 @@ function getHTTPConfig(req)
             }
         }
     }
-    return {};
+    return acceptBasedHeader;
 }
 
 function handleError(error,res)
 {
     if(error.hasOwnProperty("response"))
     {
-        if(error.response?.data)
+        if(error.response?.data && error.response?.headers?.["content-type"].includes("application/json"))
         {
             console.log(`Error | ${getFullTime()} | ${error.response.statusText} (${error.response.status})`);
             return res.status(error.response.status).json(error.response.data);
@@ -130,7 +138,18 @@ app.get(":endpoint([\\/\\w\\.-\\?\\=]*)",async function(req,res)
     try
     {
         const backendResponse = await axiosClient.get(baseEndPoint+req.params.endpoint+queryParams,httpConfig);
-        res.json(backendResponse.data);
+        
+        if (backendResponse?.headers?.["content-type"].includes("application/json"))
+            res.json(backendResponse.data);
+        else
+        {
+            
+            // res.set(backendResponse.headers);
+            // res.setHeader("content-disposition", backendResponse.headers["content-disposition"]);
+            res.setHeader("Content-Type", backendResponse?.headers?.["content-type"]);
+            backendResponse.data.pipe(res);
+            // res.send(Buffer.from(backendResponse.data, 'binary'));
+        }
     }
     catch(error)
     {

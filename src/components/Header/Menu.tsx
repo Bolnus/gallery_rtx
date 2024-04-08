@@ -2,20 +2,10 @@ import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import classes from "./navigation.module.scss";
 
-export interface StateProps {
-  authorizedLogin: string;
-}
-
-export interface DispatchProps {
-  setAuthorizedLogin: Function;
-}
-
-type State = StateProps & DispatchProps;
-
-const MENU_MAIN = "Главная";
-const MENU_ENTER = "Вход";
-const MENU_EXIT = "Выход";
-const MENU_CATEGORIES = "Категории";
+const MENU_MAIN = "Main";
+const MENU_ENTER = "Login";
+const MENU_EXIT = "Logout";
+const MENU_CATEGORIES = "Categories";
 
 function menuClicked(
   navigate: Function,

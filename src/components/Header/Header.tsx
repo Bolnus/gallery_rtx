@@ -5,6 +5,7 @@ import { getUpcomingDate } from "../../utils/commonUtils";
 import { TriangleSVG } from "../Pixmaps/Triangle/TriangleSVG";
 import { Menu } from "./Menu";
 import { DarkToggle } from "../Pixmaps/DarkToggle/DarkToggle";
+import { useTypedSelector } from "../../utils/hooks";
 
 export interface StateProps 
 {
@@ -33,9 +34,14 @@ function goBack(navigate: NavigateFunction, albumsArrayLoaded: boolean)
   }
 }
 
+function onSearchClicked(navigate: NavigateFunction)
+{
+  navigate("./search");
+}
+
 export function Header() 
 {
-  const albumsArrayLoaded = false;
+  const albumsArrayLoaded = useTypedSelector((state) => !!state.albumsList.albums.length);
   const navigate = useNavigate();
 
   // React.useEffect(function ()
@@ -59,9 +65,10 @@ export function Header()
   return (
     <nav role="navigation" className={classes.header}>
       <Routes>
-        <Route path="/tasks/detail/*" element={navBackBlock} />
+        <Route path="/album/*" element={navBackBlock} />
         <Route path="*" element={<Menu />} />
       </Routes>
+      <div className={`${classes.searchButton} emojiFont`} onClick={onSearchClicked.bind(null, navigate)}>🔎︎</div>
       <div className={classes.darkToggleWrapper}>
         <DarkToggle />
       </div>

@@ -1,26 +1,170 @@
-.listWrapper
+@import "../../../App.scss";
+
+.albumsListPage
+{
+    height: 100%;
+    display: flex;
+    flex-basis: 5px;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.5s;
+
+    // @media all and (max-width: 700px)
+    // {
+    //     width: 100%;
+    //     padding: 0;
+    // }
+}
+
+.scrollBox
 {
     width: 100%;
-    border-top: 2px solid $subColorGrey;
     flex: 1 1 auto;
     overflow-y: auto;
+    overflow-x: hidden;
     height: 0;
+    padding-bottom: var(--fontSizeLargest);
+}
+
+.searchBlock
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.inputWrapper
+{
+    margin: var(--fontSizeMedium) 0 var(--fontSizeMedium) 0;
+    width: 100%;
+}
+
+.searchInput
+{
+    min-height: 38px;
+    background-color: var(--inputBgColor);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.searchInput__input
+{
+    padding: 2px 8px;
+    box-sizing: border-box;
+    background: inherit;
+    color: var(--fontColorFirm);
+    flex: 1 1 0;
+}
+
+.searchInput__input::placeholder
+{
+    color: hsl(0, 0%, 50%);
+}
+
+.searchInput__indicatorContainer
+{
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-align-self: stretch;
+    -ms-flex-item-align: stretch;
+    align-self: stretch;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-shrink: 0;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 37px;
+}
+
+.searchInput__spacer
+{
+    -webkit-align-self: stretch;
+    -ms-flex-item-align: stretch;
+    align-self: stretch;
+    width: 1px;
+    background-color: hsl(0, 0%, 80%);
+    margin-bottom: 8px;
+    margin-top: 8px;
+    box-sizing: border-box;
+}
+
+.searchInput__indicatorClose
+{
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    // display: flex;
+    -webkit-transition: color 150ms;
+    transition: color 150ms;
+    padding: 8px;
+    box-sizing: border-box;
+    color: var(--fontColorFirm);
+    font-size: 12px;
+    width: 100%;
+    text-align: center;
+}
+
+.searchInput__indicatorClose:hover
+{
+    cursor: pointer;
+}
+
+.scrollBox_itemWrapper
+{
+    width: 60%;
+    @media all and (max-width: 1000px)
+    {
+        width: 80%;
+    }
+    @media all and (max-width: 700px)
+    {
+        width: 90%;
+    }
+    margin: var(--fontSizeLargest) auto 0 auto;
 }
 
 .albumBlock
 {
-    width: 100%;
-    flex-basis: calc(var(--fontSizeMedium) * 3);
-    height: calc(var(--fontSizeMedium) * 3);
-    max-height: calc(var(--fontSizeMedium) * 3);
-    border-top: 1px solid $subColorGrey;
-
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
     overflow: hidden;
-    background: inherit;
+    // background: inherit;
     transition: background 1s;
+    opacity: 1;
+    font-size: var(--fontSizeMedium);
+    min-height: calc(2 * var(--fontSizeMedium));
+}
+
+.navLink
+{
+    text-decoration: none;
+}
+
+.albumBlock__picturesSnap
+{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-auto-rows: 1fr;
+    grid-template-rows: 1fr 0 0 0 0 0;
+    overflow: hidden;
+
+    @media all and (max-width: 1000px)
+    {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
+    @media all and (max-width: 700px)
+    {
+        grid-template-columns: 1fr 1fr 1fr 1fr
+    }
 }
 
 .albumBlock_notLast
@@ -30,22 +174,19 @@
 
 .albumBlock_current
 {
-    background: $subColorLightGrey;
+    // background: $subColorLightGrey;
 }
 
 .albumBlock:hover
 {
     cursor: pointer;
-}
-
-.albumBlock div:hover
-{
-    cursor: pointer;
+    opacity: 0.8;
 }
 
 .albumBlock__contents
 {
     flex-grow: 1;
+    width: 100%;
     max-width: 100%;
     min-width: 0;
 }
@@ -57,7 +198,7 @@
     color: var(--fontColorFirm);
     width: 100%;
     //height: var(--fontSizeSmall) * 2;
-    margin-top: var(--fontSizeSmall);
+    margin-top: 3px;
 
     display: flex;
     justify-content: space-between;
@@ -75,6 +216,11 @@
     //width: 80%;
 }
 
+.albumBlock__name_current
+{
+    color: var(--fontColorGreenInverted);
+}
+
 .albumBlock__time
 {
     color: var(--fontColorLight);
@@ -89,17 +235,12 @@
     width: auto;
 }
 
-.albumBlock__address
+.albumBlock__tags
 {
-    font-size: var(--fontSizeSmall);
-    font-weight: lighter;
-    color: var(--fontColorLight);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    line-height: var(--fontSizeSmall);
-    max-width: 95%;
-    overflow: hidden;
-    //overflow: hidden;
+    display: flex;
+    // overflow: hidden;
+    flex-wrap: wrap;
+    margin-top: 3px;
 }
 
 .albumBlock__loader
@@ -110,3 +251,57 @@
     display: block;
     shape-rendering: auto;
 }
+
+.pagination
+{
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.pagination__label
+{
+    color: var(--fontColorFirm);
+    font-size: var(--fontSizeSmall);
+    max-height: 1.5rem;
+    height: 1.5rem;
+    max-width: 5rem;
+}
+
+.paginationButtonsBlock
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+}
+
+.paginationButtonsBlock__button
+{
+    margin: calc(var(--fontSizeSmall) / 2);
+    font-size: var(--fontSizeMedium);
+    width: var(--fontSizeLargest);
+    height: var(--fontSizeLargest);
+    border-radius: 50%;
+    padding: 0;
+}
+
+.paginationButtonsBlock__button_common
+{
+    color: white;
+    background: $appleGreen;
+}
+
+.paginationButtonsBlock__button_selected
+{
+    color: $darkGreen;
+    background: $subColorGrey;
+}
+
+.albumBlock__tagItem
+{
+    margin: 0 calc(var(--fontSizeSmall) / 2) 3px 0;
+}
+

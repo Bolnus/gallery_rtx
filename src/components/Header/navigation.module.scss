@@ -26,11 +26,26 @@
 .header
 {
   background-color: var(--mainColor);
-  height: 65px;
+  height: calc(var(--fontSizeLarge) * 2);
   min-height: 65px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  width: 100%;
+}
+
+.searchButton
+{
+  font-size: var(--fontSizeLarge);
+  color: white;
+  line-height: var(--fontSizeLarge);
+  flex: 1 1 auto;
+  text-align: end;
+  padding: 0 var(--fontSizeSmall) 5px 0;
+}
+
+.searchButton:hover
+{
+  cursor: pointer;
 }
 
 .header__link
@@ -55,7 +70,6 @@
 }
 
 
-
 .menu
 {
   display: flex;
@@ -63,7 +77,7 @@
   position: relative;
   /*top: 25px;*/
   left: 25px;
-  z-index: 1;
+  z-index: 10;
   -webkit-user-select: none;
   user-select: none;
 

@@ -10,19 +10,23 @@ function updateStyle(toggleState: boolean): void
     document.documentElement.style.setProperty("--bgColor", "#021e2a");
     document.documentElement.style.setProperty("--fontColorFirm", "white");
     document.documentElement.style.setProperty("--fontColorFirmGreen", "white");
+    document.documentElement.style.setProperty("--fontColorGreenInverted", "#004422");
     document.documentElement.style.setProperty("--fontColorLight", "#c4ccce");
-    document.documentElement.style.setProperty("--darkToggleColor", "white");
+    document.documentElement.style.setProperty("--mainColorDark", "#112734");
     document.documentElement.style.setProperty("--checkBoxColor", "#4ed164");
+    document.documentElement.style.setProperty("--inputBgColor", "#112734");
   } 
   else 
   {
-    document.documentElement.style.setProperty("--mainColor", "#70f6b9");
+    document.documentElement.style.setProperty("--mainColor", "#80eeb0");
     document.documentElement.style.setProperty("--bgColor", "#f5f6fa");
     document.documentElement.style.setProperty("--fontColorFirm", "black");
     document.documentElement.style.setProperty("--fontColorFirmGreen", "#004422");
+    document.documentElement.style.setProperty("--fontColorGreenInverted", "grey");
     document.documentElement.style.setProperty("--fontColorLight", "grey");
-    document.documentElement.style.setProperty("--darkToggleColor", "grey");
+    document.documentElement.style.setProperty("--mainColorDark", "#004422");
     document.documentElement.style.setProperty("--checkBoxColor", "#ebcdb5");
+    document.documentElement.style.setProperty("--inputBgColor", "#c4ccce");
   }
 }
 

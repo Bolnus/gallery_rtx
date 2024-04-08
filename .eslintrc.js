@@ -119,6 +119,8 @@ module.exports = {
     "react/jsx-no-useless-fragment": "warn",
     "comma-dangle": "off",
     "no-param-reassign": "off",
+    "operator-assignment": "off",
+    "no-debugger": "warn",
     "@typescript-eslint/naming-convention": [
       "error",
       {

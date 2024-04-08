@@ -1,12 +1,14 @@
 :root
 {
-    --mainColor: #70f6b9;
+    --mainColor: #80eeb0; // #70f6b9 // #004422
     --bgColor: #f5f6fa;
     --fontColorFirm: black;
     --fontColorLight: grey;
     --fontColorFirmGreen: #004422;
-    --darkToggleColor: grey;
+    --fontColorGreenInverted: #4ed164;
+    --mainColorDark: #004422;
     --checkBoxColor: #ebcdb5;
+    --inputBgColor: #112734;
 
     --fontSizeSmall: 14px;
     --fontSizeMedium: 20px;
@@ -39,11 +41,11 @@ $subColorLightGrey: #c4ccce;
 $bgColor: #f5f6fa;
 $fontColorLight: grey;
 $fontColorFirm: black;
-$mainColor: #ebcdb5;
+$mainColor: #80eeb0;
 $appleGreen: #4ed164;
 $amadoRed: #f6a89e;
-
-
+$darkGreen: #004422;
+$fontSizeInput: 16px;
 
 .rootContent
 {
@@ -56,6 +58,7 @@ $amadoRed: #f6a89e;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 ::-webkit-scrollbar
@@ -78,14 +81,16 @@ $amadoRed: #f6a89e;
 {
     border: none;
     outline: none;
-    background: $subColorGrey; //var(--subColorGrey);
-    color: black;
+    // background: $subColorGrey; //var(--subColorGrey);
+    // color: black;
     display: block;
     -webkit-appearance: textfield;
     -moz-appearance: textfield;
     min-height: 1.2em;
-    //padding: 3px;
-    //border-radius: 3px;
+    font-size: $fontSizeInput;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
 }
 
 .commonInput:focus
@@ -178,4 +183,91 @@ $amadoRed: #f6a89e;
 .emojiFont
 {
     font-family: 'Noto Emoji', sans-serif;
+}
+
+.reactSelectTags__control
+{
+    background-color: var(--inputBgColor) !important;
+    border: none !important;
+}
+
+.reactSelectTags__control--is-focused
+{
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.reactSelectTags--is-disabled .reactSelectTags__multi-value__remove
+{
+    visibility: hidden;
+}
+
+.reactSelectTags__multi-value
+{
+    background-color: $appleGreen !important;
+    font-size: var(--fontSizeSmall);
+    padding: 0 8px 0 8px;
+    border-radius: var(--fontSizeSmall) !important;
+    color: white;
+    pointer-events: all !important;
+}
+
+.reactSelectTags__multi-value:hover
+{
+    cursor: pointer;
+}
+
+.reactSelectTags__multi-value__label
+{
+    color: white !important;
+    font-weight: bold;
+    text-wrap: nowrap;
+}
+
+.reactSelectTags__indicator
+{
+    color: var(--fontColorFirm) !important;
+}
+
+.reactSelectTags__indicator:hover
+{
+    cursor: pointer !important;
+}
+
+.reactSelectTags__menu
+{
+    z-index: 3 !important;
+    background-color: var(--inputBgColor) !important;
+    color: var(--fontColorFirm);
+    pointer-events: all !important;
+}
+
+// .react-selectTags__option
+// {
+//     pointer-events: all !important;
+// }
+
+// .react-selectTags__option:hover
+// {
+//     cursor: pointer !important;
+//     background-color: $mainColor !important;
+//     color: white !important;
+// }
+
+.reactSelectTags__option--is-focused
+{
+    background-color: $mainColor !important;
+    color: white !important;
+    pointer-events: all !important;
+}
+
+.reactSelectTags__option--is-focused:hover
+{
+    cursor: pointer !important;
+}
+
+.reactSelectTags__input
+{
+    color: var(--fontColorFirm) !important;
 }

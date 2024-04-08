@@ -2,7 +2,7 @@ import React from "react";
 import Slider from "react-slick";
 import {GalleryImage} from "../../../redux/features/albumsList/albumsListTypes";
 import classes from "./PhotoView.module.scss";
-import {invertTrigger, numberDispatch, stringDispatch} from "../../../utils/commonUtils";
+import {invertTrigger, updateStateValue} from "../../../utils/commonUtils";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import {Modal, ModalType} from "../../Modal/Modal";
@@ -22,15 +22,14 @@ export interface StateProps
 //     deleteImage: Function
 // }
 
-function mapViewImages(toolBarActive: boolean, setToolBarActive: Function, element: GalleryImage) 
+function mapViewImages(toolBarActive: boolean, setToolBarActive: (active: boolean) => void, element: GalleryImage) 
 {
   return (
-    <div key={element.id} className={classes.imageWrapper}>
+    <div key={element.id} className={classes.imageWrapper} >
       <img
         alt={element.name || "not found"}
-        src={element.data}
+        src={element.url}
         onClick={invertTrigger.bind(null, toolBarActive, setToolBarActive)}
-        // onClick={stringDispatch.bind(null,props.setCurrentViewId,props.element.id)}
       />
     </div>
   );
@@ -109,7 +108,9 @@ export function PhotoView()
         arrows
         initialSlide={imageIndex}
         infinite={false}
-        afterChange={numberDispatch.bind(null, setImageIndex)}
+        afterChange={(updateStateValue<number>).bind(null, setImageIndex)}
+        lazyLoad="anticipated"
+        touchThreshold={10}
       >
         {images.map(mapViewImages.bind(null, toolBarActive, setToolBarActive))}
       </Slider>

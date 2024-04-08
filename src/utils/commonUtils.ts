@@ -1,11 +1,10 @@
 import React from "react";
+import { UnknownAction } from "redux";
+import { AppDispatch } from "../redux/reduxStore";
+import { SelectOption } from "./commonTypes";
 
 export function resetScrollOnBlur() 
 {
-  //event.preventDefault();
-  //let inputElement = event.target as HTMLInputElement;
-  //inputElement.focus({preventScroll: true});
-  //setTimeout(() => window.scrollTo(0,100), 500)
   window.scrollTo(0, 0);
 }
 
@@ -26,27 +25,6 @@ export function getUpcomingDate(): string
       String("00" + date.getDate()).slice(-2) +
       "235959"
   );
-}
-
-export function useDebounce<T>(value: T, delay: number): T {
-  // State and setters for debounced value
-  const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
-  React.useEffect(
-    () => {
-      // Update debounced value after delay
-      const handler = setTimeout(() => {
-        setDebouncedValue(value);
-      }, delay);
-      // Cancel the timeout if value changes (also on delay change or unmount)
-      // This is how we prevent debounced value from updating if value is changed ...
-      // .. within the delay period. Timeout gets cleared and restarted.
-      return () => {
-        clearTimeout(handler);
-      };
-    },
-    [value, delay] // Only re-call effect if value or delay changes
-  );
-  return debouncedValue;
 }
 
 export function onFocusIn(getCatalog: Function, catalogLoaded: boolean) 
@@ -75,31 +53,76 @@ export function toInteger(text: string): number
   return 0;
 }
 
-export function toFloat(text: string): number {
+export function toFloat(text: string): number 
+{
   const digitArray: RegExpMatchArray | null = text.match(/^-?\d+(\.\d+)?$/);
-  if (digitArray) {
+  if (digitArray) 
+  {
     return +digitArray.join();
   }
   return 0;
 }
 
-export function onSimpleDispatchClicked(dispatch: Function, event: React.FormEvent) 
+export function onSimpleDispatch(
+  dispatch: AppDispatch,
+  actionCreator: () => UnknownAction,
+  localEvent: React.FormEvent
+)
 {
-  event.preventDefault();
-  dispatch();
+  localEvent.preventDefault();
+  dispatch(actionCreator());
 }
 
-export function stringDispatch(dispatchMethod: Function, value: string) 
+export function onCallbackExec(
+  callBack: () => void,
+  localEvent: React.FormEvent
+)
 {
-  dispatchMethod(value);
+  localEvent.preventDefault();
+  callBack();
 }
 
-export function numberDispatch(dispatchMethod: Function, value: number) 
+export function setStateOnInputChange(
+  callBack: (str: string) => void,
+  localEvent: React.FormEvent
+)
 {
-  dispatchMethod(value);
+  localEvent.preventDefault();
+  const inputElement = localEvent.target as HTMLInputElement;
+  callBack(inputElement.value);
 }
 
-export function invertTrigger(flag: boolean, setValue: Function) 
+export function valueDispatch<T>(
+  dispatch: AppDispatch,
+  actionCreator: (str: T) => UnknownAction,
+  value: T
+) 
+{
+  dispatch(actionCreator(value));
+}
+
+export function updateStateValue<T>(
+  setState: (str: T) => void,
+  value: T
+) 
+{
+  setState(value);
+}
+
+export function invertTrigger(flag: boolean, setValue: (newFlag: boolean) => void) 
 {
   setValue(!flag);
+}
+
+export function mapOptionToLabel(option: SelectOption): string
+{
+  return option.label;
+}
+
+export function mapValueToOption(value: string): SelectOption
+{
+  return {
+    value,
+    label: value
+  };
 }

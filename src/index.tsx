@@ -18,3 +18,5 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+(window as any).store = store;

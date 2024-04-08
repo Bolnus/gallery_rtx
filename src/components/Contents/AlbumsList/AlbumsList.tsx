@@ -1,86 +1,314 @@
 import React from "react";
+import { NavigateFunction, useNavigate, useSearchParams } from "react-router-dom";
+import Select, { MultiValue } from "react-select";
 import classes from "./AlbumsList.module.scss";
+import { Album } from "../../../redux/features/albumsList/albumsListTypes";
+import { AlbumListItem } from "./AlbumListItem";
+import { useAppDispatch, useDebounce, useTypedSelector } from "../../../utils/hooks";
+import { getAlbumsListTC, getSearchTagsTC, setIsFetching } from "../../../redux/features/albumsList/albumsListSlice";
+import { Pagination } from "./Pagination";
+import { DEFAULT_PAGE_SIZE } from "../../../utils/localStorageUtils";
+import { SelectOption } from "../../../utils/commonTypes";
+import { DefinedTag } from "../../../api/apiTypes";
+import { mapOptionToLabel, mapValueToOption, resetScrollOnBlur, setStateOnInputChange } from "../../../utils/commonUtils";
 
-interface AlbumArgument 
+const halfClientPageSize = 2;
+const PAGE_PARAM = "page";
+const SIZE_PARAM = "size";
+const TAGS_PARAM = "tags";
+const NAME_PARAM = "name";
+
+interface AlbumListProps
 {
-  navigate: Function;
-  album: Album;
-  setAlbumNumber: Function;
-  scrollAlbumIndex: number;
-  setScrollAlbumIndex: Function;
+  isSearch?: boolean;
 }
 
-function onAlbumClicked(albumArgument: AlbumArgument) 
+function onAlbumClicked(navigate: NavigateFunction, albumId: string) 
 {
-  albumArgument.setAlbumNumber(albumArgument.album.albumNumber, albumArgument.album.id);
-  albumArgument.setScrollAlbumIndex(albumArgument.scrollAlbumIndex);
-  albumArgument.navigate("detail?id=" + albumArgument.album.id);
+  navigate(`album?id=${albumId}`);
 }
 
-function scrollToBlock(taskBlockCurrent: HTMLDivElement | null, smooth = false)
-{
-  if (taskBlockCurrent) 
-  {
-    if (smooth)
-    {
-      taskBlockCurrent.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }
-    else 
-    {
-      taskBlockCurrent.scrollIntoView({ block: "nearest" });
-    }
-    taskBlockCurrent = null;
-  }
-}
-
-function mapTaskComponents(
-  taskBlockCurrentRef: React.RefObject<HTMLDivElement>,
-  currentTaskIndex: number,
-  halfPageSize: number,
-  task: TaskBrief,
+function mapAlbumToBlock(
+  scrollAlbumBlockRef: React.RefObject<HTMLDivElement>,
+  currentAlbumId: string,
+  scrollBlockNumber: number,
+  album: Album,
   index: number,
-  taskArray: TaskBrief[]
-) {
-  //HTMLDivElement | null
-  let nextScrollTaskIndex: number;
-  if (index + halfPageSize > taskArray.length - 1) nextScrollTaskIndex = taskArray.length - 1;
-  else nextScrollTaskIndex = index + halfPageSize;
-
+  // albumsList: Album[],
+) 
+{
   return (
-    <AlbumBlock
-      task={task}
-      ref={currentTaskIndex === index ? taskBlockCurrentRef : null}
-      nextScrollTaskIndex={nextScrollTaskIndex}
-      key={task.taskNumber}
+    <AlbumListItem
+      album={album}
+      isCurrent={album.id === currentAlbumId}
+      ref={scrollBlockNumber === index ? scrollAlbumBlockRef : null}
+      key={album.id}
     />
   );
 }
 
-export function AlbumsList()
+function scrollToDiv(divBlock: HTMLDivElement | null, smooth = false)
 {
-  let tasksComponents = taskArray.map(mapTaskComponents.bind(null,taskBlockCurrentRef,props.scrollTaskIndex,halfPageSize.current));
+  if (divBlock) 
+  {
+    divBlock.scrollIntoView({ block: "nearest", behavior: smooth ? "smooth" : undefined });
+    // divBlock = null;
+  }
+}
+
+function mapDefinedTagsToOptions(definedTag: DefinedTag): SelectOption
+{
+  return {
+    value: definedTag.id,
+    label: definedTag.tagName
+  };
+}
+
+function changeSearchName(
+  setSearchName: (str: string) => void,
+  setPageNumber: (newPage: number) => void,
+  localEvent: React.FormEvent
+)
+{
+  localEvent.preventDefault();
+  const inputElement = localEvent.target as HTMLInputElement;
+  setPageNumber(1);
+  setSearchName(inputElement.value);
+}
+
+function clearSearchName(setSearchName: (str: string) => void)
+{
+  setSearchName("");
+}
+
+export function AlbumsList({ isSearch }: AlbumListProps)
+{
+  const dispatch = useAppDispatch();
+  const albums = useTypedSelector((state) => state.albumsList.albums);
+  const currentAlbumId = useTypedSelector((state) => state.album.albumData.id);
+  const totalCount = useTypedSelector((state) => state.albumsList.totalCount);
+  const searchTags = useTypedSelector((state) => state.albumsList.searchTags);
+  const isFetching = useTypedSelector((state) => state.albumsList.isFetching);
+  const scrollAlbumBlockRef = React.useRef<HTMLDivElement>(null);
+  const listBoxRef = React.useRef<HTMLDivElement>(null);
+  const [scrollBlockNumber, setScrollBlockNumber] = React.useState(-1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const debouncedSearchParams = useDebounce<URLSearchParams>(searchParams, 500);
+  const [pageNumber, setPageNumber] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
+  const [selectedTags, setSelectedTags] = React.useState<readonly SelectOption[]>([]);
+  const [searchName, setSearchName] = React.useState<string>("");
+
+  /** Selected block number update */
+  React.useEffect(function()
+  {
+    const listBox = listBoxRef.current as HTMLDivElement;
+    if (listBox)
+    {
+      let nextScrollAlbumIndex = 0;
+      let currentAlbumIndex = 0;
+      for (let i = 0; i < albums.length; i++)
+      {
+        if (albums[i].id === currentAlbumId)
+        {
+          currentAlbumIndex = i;
+          break;
+        }
+      }
+      if (currentAlbumIndex)
+      {
+        if (currentAlbumIndex + halfClientPageSize > albums.length - 1) 
+        {
+          nextScrollAlbumIndex = albums.length - 1;
+        }
+        else 
+        {
+          nextScrollAlbumIndex = currentAlbumIndex + halfClientPageSize;
+        }
+      }
+      setScrollBlockNumber(nextScrollAlbumIndex);
+    }
+  }, [listBoxRef, albums, currentAlbumId]);
+
+  /** Scroll to selected block after page inited */
+  React.useLayoutEffect(function()
+  {
+    if (listBoxRef.current)
+    {
+      scrollToDiv(scrollAlbumBlockRef.current);
+    }
+  }, [scrollAlbumBlockRef.current, listBoxRef.current]);
+
+  /** Init state hooks with query params */
+  React.useEffect(function()
+  {
+    const newPage = searchParams.get(PAGE_PARAM);
+    const newPageSize = searchParams.get(SIZE_PARAM);
+    const tagsStr = searchParams.get(TAGS_PARAM);
+    const nameStr = searchParams.get(NAME_PARAM);
+    if (newPage)
+    {
+      setPageNumber(Number(newPage));
+    }
+    else
+    {
+      setPageNumber(1);
+    }
+    if (newPageSize)
+    {
+      setPageSize(Number(newPageSize));
+    }
+    else
+    {
+      setPageSize(DEFAULT_PAGE_SIZE);
+    }
+    if (tagsStr)
+    {
+      const tagsArray = tagsStr.split(",");
+      setSelectedTags(tagsArray.map(mapValueToOption));
+    }
+    else
+    {
+      setSelectedTags([]);
+    }
+    if (nameStr)
+    {
+      setSearchName(nameStr);
+    }
+    else
+    {
+      setSearchName("");
+    }
+  }, []);
+
+  /** Fetch albums list on query params update */
+  React.useEffect(function()
+  {
+    dispatch(getAlbumsListTC(debouncedSearchParams));
+    // .then(function()
+    // {
+    //   scrollToDiv(scrollAlbumBlockRef.current, true);
+    // });
+  }, [debouncedSearchParams, dispatch]);
+
+  /** Init available tags list */
+  React.useEffect(function()
+  {
+    dispatch(getSearchTagsTC());
+  }, []);
+
+  /** Update query params based on state variables */
+  React.useEffect(function()
+  {
+    const newSearchParams = new URLSearchParams();
+    if (!selectedTags.length || !isSearch)
+    {
+      newSearchParams.delete(TAGS_PARAM);
+    }
+    else
+    {
+      const tagsStr = selectedTags.map(mapOptionToLabel).join(",");
+      newSearchParams.set(TAGS_PARAM, tagsStr);
+    }
+    if (!searchName || !isSearch)
+    {
+      newSearchParams.delete(NAME_PARAM);
+    }
+    else
+    {
+      newSearchParams.set(NAME_PARAM, searchName);
+    }
+    newSearchParams.set(PAGE_PARAM, String(pageNumber));
+    newSearchParams.set(SIZE_PARAM, String(pageSize));
+    
+    setSearchParams(newSearchParams);
+  }, [selectedTags, setSearchParams, isSearch, pageNumber, pageSize, searchName]);
+
+  /** Set page number */
+  const onPageSelect = React.useCallback(function(newPage: number)
+  {
+    setPageNumber(newPage);
+    dispatch(setIsFetching(true));
+    listBoxRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [setPageNumber]);
+
+  const albumBlockComponents = albums.map(
+    mapAlbumToBlock.bind(null, scrollAlbumBlockRef, currentAlbumId, scrollBlockNumber)
+  );
+
+  const onTagsSelectionChange = React.useCallback(function(newValue: MultiValue<SelectOption>)
+  {
+    setPageNumber(1);
+    setSelectedTags(newValue);
+  }, [setPageNumber, setSelectedTags]);
 
   return (
-    <div
-      className={classes.listWrapper}
-      // onScroll={scrollHandler.bind(null, {
-      //   newPageSize: pageSize.current + props.taskArray.length,
-      //   getTaskList: props.getTaskList,
-      //   searchParams: searchParams,
-      //   setSearchParams: setSearchParams,
-      //   taskBlockLoaderRef: taskBlockLoaderRef,
-      //   fetchBlocked: fetchBlocked,
-      //   setFetchBlocked: setFetchBlocked
-      // })}
-      ref={listBoxRef}
-    >
-      {tasksComponents}
-      <div
-        className={classes.albumBlock}
-        ref={taskBlockLoaderRef}
-        key={props.taskArray.length ? props.taskArray[props.taskArray.length - 1].taskNumber + 1 : 1}
-      >
-        {lastTaskBlock}
+    <div className={`${classes.albumsListPage}`}>
+      <div className={classes.scrollBox} ref={listBoxRef}>
+        {isSearch ? (
+          <div className={`${classes.searchBlock} ${classes.scrollBox_itemWrapper}`}>
+            <div className={`${classes.inputWrapper} ${classes.searchInput}`}>
+              <input
+                placeholder="Album name..."
+                onBlur={resetScrollOnBlur}
+                value={searchName}
+                onChange={changeSearchName.bind(null, setSearchName, setPageNumber)}
+                className={`${classes.searchInput__input} commonInput`}
+              />
+              <div className={classes.searchInput__indicatorContainer}>
+                <span className={classes.searchInput__spacer} />
+                <div
+                  onClick={clearSearchName.bind(null, setSearchName)}
+                  className={`${classes.searchInput__indicatorClose} emojiFont`}
+                >
+                  ❌
+                </div>
+              </div>
+            </div>
+            <Select
+              options={searchTags.map(mapDefinedTagsToOptions)}
+              isMulti
+              value={selectedTags}
+              onChange={onTagsSelectionChange}
+              className={classes.inputWrapper}
+              isClearable
+              classNamePrefix="reactSelectTags"
+              placeholder="Tags..."
+              onBlur={resetScrollOnBlur}
+              // menuIsOpen
+            />
+          </div>
+        ) : null}
+        {albums.length ? (
+          <Pagination
+            albumsCount={totalCount}
+            page={pageNumber}
+            pageSize={pageSize}
+            onPageSelect={onPageSelect}
+            loadedAlbumsNumber={albums.length}
+            isFetching={isFetching}
+          />
+        ) : null}
+        {albumBlockComponents}
+        {albumBlockComponents?.length ? null : (
+          <div
+            className={classes.albumBlock}
+            // ref={taskBlockLoaderRef}
+            key="last"
+          >
+            <div className="emptyComment">Not found</div>
+          </div>
+        )}
+        {albums.length ? (
+          <Pagination
+            albumsCount={totalCount}
+            page={pageNumber}
+            pageSize={pageSize}
+            onPageSelect={onPageSelect}
+            loadedAlbumsNumber={albums.length}
+            isFetching={isFetching}
+          />
+        ) : null}
       </div>
     </div>
   );
