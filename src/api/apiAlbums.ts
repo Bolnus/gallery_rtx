@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Album, FileLoadState, GalleryImage } from "../redux/features/albumsList/albumsListTypes";
-import { ApiAlbum, AlbumWithImages, AlbumsListWithTotal, ApiAlbumsWithTotal, ApiResponse, DefinedTag, ApiTag } from "./apiTypes";
+import { ApiAlbum, AlbumWithImages, AlbumsListWithTotal, ApiAlbumsWithTotal, ApiResponse, DefinedTag, ApiTag, ApiMessage } from "./apiTypes";
 
 const baseURL = `${window.location.protocol}//${window.location.hostname}:${process.env.REACT_APP_PROXY_PORT || ""}`;
 const axiosClient = axios.create({
@@ -97,7 +97,7 @@ export async function getAlbumsList(searchParams: URLSearchParams): Promise<ApiR
   {
     handleResponseError(error, path);
     return {
-      rc: Number(error?.code),
+      rc: Number(error?.response?.status),
       data: {
         albumsList: [],
         totalCount: 0
@@ -124,7 +124,7 @@ export async function getAlbum(albumId: string): Promise<ApiResponse<AlbumWithIm
   {
     handleResponseError(error, path);
     return {
-      rc: Number(error?.code),
+      rc: Number(error?.response?.status),
       data: null
     };
   }
@@ -135,7 +135,7 @@ export async function getAllTags(): Promise<ApiResponse<DefinedTag[]>>
   const path = "/tags";
   try
   {
-    const response = await axiosClient.get<ApiTag[]>(`${path}`);
+    const response = await axiosClient.get<ApiTag[]>(path);
     return {
       rc: 200,
       data: response.data.map(mapTags)
@@ -145,8 +145,37 @@ export async function getAllTags(): Promise<ApiResponse<DefinedTag[]>>
   {
     handleResponseError(error, path);
     return {
-      rc: Number(error?.code),
+      rc: Number(error?.response?.status),
       data: []
+    };
+  }
+}
+
+export async function putAlbumHeaders(
+  id: string,
+  albumName: string,
+  tags: string[]
+): Promise<ApiResponse<ApiMessage | null>> 
+{
+  const path = "/albums_list/album/headers";
+  try 
+  {
+    await axiosClient.put(path, {
+      id,
+      albumName,
+      tags
+    });
+    return {
+      rc: 200,
+      data: null
+    };
+  } 
+  catch (error: any) 
+  {
+    handleResponseError(error, path);
+    return {
+      rc: Number(error?.response?.status),
+      data: error?.response?.data as ApiMessage
     };
   }
 }

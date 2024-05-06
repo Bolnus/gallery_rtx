@@ -21,6 +21,12 @@ export interface ApiResponse<T>
   data: T;
 }
 
+export interface ApiMessage
+{
+  title: string;
+  message: string;
+}
+
 export interface AlbumWithImages
 {
   album: Album;

@@ -5,15 +5,31 @@ import CreatableSelect from "react-select/creatable";
 import classes from "./album.module.scss";
 import { Modal, ModalType } from "../../Modal/Modal";
 import { GridImage } from "./AlbumImage";
-import { invertTrigger } from "../../../utils/commonUtils";
+import {
+  invertTrigger,
+  mapDefinedTagsToOptions,
+  mapOptionsToDefinedTags,
+  resetScrollOnBlur,
+  valueDispatch
+} from "../../../utils/commonUtils";
 import { FileLoadState, GalleryImage } from "../../../redux/features/albumsList/albumsListTypes";
 import { AppDispatch } from "../../../redux/reduxStore";
 import { useAppDispatch, useTypedSelector } from "../../../utils/hooks";
 import { SkeletonLoader } from "../../Pixmaps/SkeletonLoader/SkeletonLoader";
-import { getAlbumTC, updateImageLoadState } from "../../../redux/features/album/albumSlice";
-import { trackWindowScroll } from "react-lazy-load-image-component";
+import {
+  getAlbumTC,
+  pushNewAlbumTag,
+  putAlbumHeadersTC,
+  setAlbumName,
+  setAlbumTags,
+  setUnsavedChanges,
+  updateImageLoadState
+} from "../../../redux/features/album/albumSlice";
 import { SelectOption } from "../../../utils/commonTypes";
-import { DefinedTag } from "../../../api/apiTypes";
+import { ApiMessage, DefinedTag } from "../../../api/apiTypes";
+import { getSearchTagsTC } from "../../../redux/features/albumsList/albumsListSlice";
+import { ChangesSaveState } from "../../../redux/features/album/albumTypes";
+import { TextInput } from "../../controls/TextInput";
 
 // export interface StateProps {
 //   currentTaskNumber: number;
@@ -29,6 +45,8 @@ import { DefinedTag } from "../../../api/apiTypes";
 //   setImageData: Function;
 //   getGalleryPhotos: Function;
 // }
+
+const canEdit = true;
 
 function handleFileReadError(error: any)
 {
@@ -84,14 +102,6 @@ function mapLoaders(loaderId: string): JSX.Element
   );
 }
 
-function mapTagsToOptions(tag: DefinedTag): SelectOption
-{
-  return {
-    value: tag.id,
-    label: tag.tagName
-  };
-}
-
 function onImageError(dispatch: AppDispatch, galleryImage: GalleryImage)
 {
   dispatch(updateImageLoadState({
@@ -127,47 +137,84 @@ function handleKeyDown(
   }
 }
 
+function onCreateOption(
+  dispatch: AppDispatch,
+  inputValue: string
+)
+{
+  dispatch(pushNewAlbumTag(inputValue));
+}
+
+function changeSelectedTags(
+  dispatch: AppDispatch,
+  newTags: readonly SelectOption[]
+)
+{
+  dispatch(setAlbumTags(newTags.map(mapOptionsToDefinedTags)));
+}
+
+async function onSaveChanges(dispatch: AppDispatch, setErrorMessage: (message: ApiMessage | null) => void)
+{
+  const apiMessage = await dispatch(putAlbumHeadersTC());
+  setErrorMessage(apiMessage);
+}
+
+function closeModal(setErrorMessage: (e: ApiMessage | null) => void)
+{
+  setErrorMessage(null);
+}
+
 export function Album() 
 {
   const dispatch = useAppDispatch();
   const imageCover = useTypedSelector((state) => state.album.images?.[0]);
   const albumName = useTypedSelector((state) => state.album.albumData.albumName);
   const tags = useTypedSelector((state) => state.album.albumData.tags);
+  const searchTags = useTypedSelector((state) => state.albumsList.searchTags);
   const isFetching = useTypedSelector((state) => state.album.isFetching);
   const images = useTypedSelector((state) => state.album.albumData.picturesSnap);
   const [searchParams] = useSearchParams();
-  const [modalVisible, setModalVisible] = React.useState(false);
-  const [loaderIds, setLoaderIds] = React.useState<string[]>([]);
-  const [inputValue, setInputValue] = React.useState("");
-  const [selectedTags, setSelectedTags] = React.useState<SelectOption[]>([]);
-  const editBlocked = true;
+  // const [modalVisible, setModalVisible] = React.useState(false);
+  const unsavedChanges = useTypedSelector((state) => state.album.unsavedChanges);
+  // const [loaderIds, setLoaderIds] = React.useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = React.useState<ApiMessage | null>(null);
+  const [isOnEdit, setIsOnEdit] = React.useState(false);
+  
   let pageContents: JSX.Element;
   let albumCover: JSX.Element;
 
   React.useEffect(function ()
   {
-    const requestID = String(searchParams.get("id"));
-    dispatch(getAlbumTC(requestID));
-  }, [searchParams]);
+    if (!isOnEdit) 
+    {
+      const requestID = String(searchParams.get("id"));
+      dispatch(getAlbumTC(requestID));
+    }
+  }, [searchParams, isOnEdit, dispatch]);
+
+  /** Init available tags list */
+  React.useEffect(function()
+  {
+    dispatch(getSearchTagsTC());
+  }, [dispatch]);
+
+  // React.useEffect(function()
+  // {
+  //   const initialLoaderIds: string[] = [];
+  //   for (let i = 0; i < 50; i++)
+  //   {
+  //     initialLoaderIds.push(String(i));
+  //   }
+  //   setLoaderIds(initialLoaderIds);
+  // }, []);
 
   React.useEffect(function()
   {
-    const initialLoaderIds: string[] = [];
-    for (let i = 0; i < 50; i++)
+    return function()
     {
-      initialLoaderIds.push(String(i));
-    }
-    setLoaderIds(initialLoaderIds);
+      dispatch(setUnsavedChanges(ChangesSaveState.Saved));
+    };
   }, []);
-
-  const tagsOptions = React.useMemo(
-    function () 
-    {
-      return tags.map(mapTagsToOptions);
-    },
-    [tags]
-  );
-
   
   if (isFetching || images.length) 
   {
@@ -204,45 +251,89 @@ export function Album()
       <div className={classes.scrollWrapper}>
         <div className={classes.galleryHeader}>
           {albumCover}
-          <h1 className={classes.galleryHeader__headerText}>{albumName}</h1>
-          <div className={classes.toolBar}>
-            <label className={classes.toolBar__inputWrapper}>
-              {editBlocked ? null : (
-                <input
-                  type="file"
-                  accept="image/*"
-                  // value={props.fileName}
-                  onChange={onFileInputChanged.bind(null, dispatch)}
-                />
-              )}
-              <span
-                className={`${classes.toolBar__button} pushButton`}
-                onClick={editBlocked ? invertTrigger.bind(null, modalVisible, setModalVisible) : () => {}}
+          {isOnEdit ? (
+            <div className={classes.galleryHeader__leftContent}>
+              <TextInput
+                value={albumName}
+                onChange={(valueDispatch<string>).bind(null, dispatch, setAlbumName)}
+                isClearable
+              />
+            </div>
+          ) : (
+            <h1
+              className={`${classes.galleryHeader__headerText}
+              ${classes.galleryHeader__leftContent}`}
+            >
+              {isFetching ? "--" : albumName}
+            </h1>
+          )}
+          {canEdit && (
+            <div className={classes.toolBar}>
+              {isOnEdit ? (
+                <>
+                  {unsavedChanges ? (
+                    <button
+                      onClick={onSaveChanges.bind(null, dispatch, setErrorMessage)}
+                      className={`${classes.toolBar__button} ${classes.toolBar__button_isIcon} emojiFont pushButton`}
+                      title="Save changes"
+                    >
+                      {unsavedChanges === ChangesSaveState.Unsaved ? "💾" : "⏳"}
+                    </button>
+                  ) : null}
+                  <label className={classes.toolBar__inputWrapper}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      // value={props.fileName}
+                      onChange={onFileInputChanged.bind(null, dispatch)}
+                    />
+                    <span
+                      className={`${classes.toolBar__button} ${classes.toolBar__button_isIcon} pushButton emojiFont`}
+                      title="Add images"
+                      // onClick={editBlocked ? closeModal.bind(null, setErrorMessage) : () => {}}
+                    >
+                      ➕
+                    </span>
+                  </label>
+                </>
+              ) : null}
+              <button
+                onClick={invertTrigger.bind(null, isOnEdit, setIsOnEdit)}
+                className={`${classes.toolBar__button} ${classes.toolBar__button_isIcon} emojiFont pushButton`}
+                title="Edit"
               >
-                <span className="emojiFont">+</span>
-                Add
-              </span>
-            </label>
-          </div>
+                {isOnEdit ? "⟳" : "✏️"}
+              </button>
+            </div>
+          )}
         </div>
         <div className={classes.galleryContents}>
           <CreatableSelect
-            options={tagsOptions}
+            options={searchTags.map(mapDefinedTagsToOptions)}
             isMulti
-            value={tagsOptions}
-            isDisabled
-            // onChange={onMultiSelectChange.bind(null, props.updateGroup)}
+            value={tags.map(mapDefinedTagsToOptions)}
+            onChange={changeSelectedTags.bind(null, dispatch)}
+            onCreateOption={onCreateOption.bind(null, dispatch)}
             className={classes.reactSelectTagsWrapper}
             isClearable
             classNamePrefix="reactSelectTags"
             placeholder="Tags..."
+            onBlur={resetScrollOnBlur}
             // inputValue={inputValue}
             // onInputChange={setInputValue}
             // onKeyDown={handleKeyDown.bind(null, inputValue, selectedTags, setSelectedTags, setInputValue)}
+            isDisabled={!isOnEdit}
           />
           {pageContents}
         </div>
       </div>
+      {errorMessage ? (
+        <Modal
+          onClose={closeModal.bind(null, setErrorMessage)}
+          header={errorMessage.message}
+          modalType={ModalType.Info}
+        />
+      ) : null}
     </div>
   );
 }

@@ -44,10 +44,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: calc(var(--fontSizeLargest) * 5);
+    min-height: calc(var(--fontSizeLargest) * 5);
     margin: var(--fontSizeLargest) 15% 0 15%;
     background: var(--mainColorDark);
     border-radius: var(--fontSizeLargest);
+    overflow: hidden;
     // padding: 0 15% 0 15%;
 
     @media all and (max-width: 700px)
@@ -80,8 +81,18 @@
     font-size: var(--fontSizeLargest);
     font-weight: bold;
     color: white;
+    word-break: break-word;
+}
+
+.galleryHeader__leftContent
+{
     z-index: 2;
     margin-left: var(--fontSizeLargest);
+    flex-grow: 1;
+    @media all and (max-width: 700px)
+    {
+        margin-left: var(--fontSizeSmall);
+    }
 }
 
 .section__infoHeader
@@ -96,11 +107,16 @@
 {
     z-index: 2;
     display: flex;
+    flex-direction: row;
     //justify-content: space-between;
     padding: var(--fontSizeSmall) 5px var(--fontSizeSmall) 5px;
     align-items: center;
     margin-right: var(--fontSizeLargest);
-    
+    @media all and (max-width: 700px)
+    {
+        margin-right: var(--fontSizeSmall);
+        flex-direction: column;
+    }
 }
 
 .toolBar__inputWrapper
@@ -130,16 +146,23 @@
     outline: none;
     font-size: var(--fontSizeMedium);
     color: white;
-    // font-weight: bold;
-    // border-radius: 4px;
-    padding: var(--fontSizeSmall);
-    height: fit-content;
-    //font-family: 'DejaVu Sans Mono', 'Noto Emoji', sans-serif;
+    // padding: 0 var(--fontSizeSmall) 0 var(--fontSizeSmall);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(2 * var(--fontSizeMedium));
+    margin: 4px;
+}
+
+.toolBar__button_isIcon
+{
+    width: calc(2 * var(--fontSizeMedium));
 }
 
 .toolBar__button span
 {
-    margin-right: 4px;
+    // margin-right: 4px;
+    line-height: 1rem;
 }
 
 .galleryContents

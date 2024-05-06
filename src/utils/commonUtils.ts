@@ -2,6 +2,8 @@ import React from "react";
 import { UnknownAction } from "redux";
 import { AppDispatch } from "../redux/reduxStore";
 import { SelectOption } from "./commonTypes";
+import { DefinedTag } from "../api/apiTypes";
+import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 
 export function resetScrollOnBlur() 
 {
@@ -94,7 +96,7 @@ export function setStateOnInputChange(
 
 export function valueDispatch<T>(
   dispatch: AppDispatch,
-  actionCreator: (str: T) => UnknownAction,
+  actionCreator: ActionCreatorWithPayload<T>, // (newValue: T) => UnknownAction,
   value: T
 ) 
 {
@@ -124,5 +126,21 @@ export function mapValueToOption(value: string): SelectOption
   return {
     value,
     label: value
+  };
+}
+
+export function mapDefinedTagsToOptions(definedTag: DefinedTag): SelectOption
+{
+  return {
+    value: definedTag.id,
+    label: definedTag.tagName
+  };
+}
+
+export function mapOptionsToDefinedTags(option: SelectOption): DefinedTag
+{
+  return {
+    id: option.value,
+    tagName: option.label
   };
 }

@@ -1,8 +1,10 @@
 import { PayloadAction, ThunkAction, createSlice } from "@reduxjs/toolkit";
+import { v4 as uuidv4 } from "uuid";
 import { Album, GalleryImage } from "../albumsList/albumsListTypes";
-import { AlbumState } from "./albumTypes";
+import { AlbumState, ChangesSaveState } from "./albumTypes";
 import { AppDispatch, RootState, SliceActions } from "../../reduxStore";
-import { getAlbum } from "../../../api/apiAlbums";
+import { getAlbum, putAlbumHeaders } from "../../../api/apiAlbums";
+import { ApiMessage, DefinedTag } from "../../../api/apiTypes";
 
 const initialState: AlbumState = {
   albumData: {
@@ -15,7 +17,8 @@ const initialState: AlbumState = {
   },
   images: [],
   currentViewId: "",
-  isFetching: false
+  isFetching: false,
+  unsavedChanges: ChangesSaveState.Saved
 };
 
 export const albumSlice = createSlice({
@@ -67,6 +70,28 @@ export const albumSlice = createSlice({
     setAlbumIsFetching(state, action: PayloadAction<boolean>)
     {
       state.isFetching = action.payload;
+    },
+    setAlbumTags(state, action: PayloadAction<DefinedTag[]>)
+    {
+      state.albumData.tags = action.payload;
+      state.unsavedChanges = ChangesSaveState.Unsaved;
+    },
+    pushNewAlbumTag(state, action: PayloadAction<string>)
+    {
+      state.albumData.tags.push({
+        tagName: action.payload,
+        id: uuidv4()
+      });
+      state.unsavedChanges = ChangesSaveState.Unsaved;
+    },
+    setUnsavedChanges(state, action: PayloadAction<ChangesSaveState>)
+    {
+      state.unsavedChanges = action.payload;
+    },
+    setAlbumName(state, action: PayloadAction<string>)
+    {
+      state.albumData.albumName = action.payload;
+      state.unsavedChanges = ChangesSaveState.Unsaved;
     }
   }
 });
@@ -107,6 +132,35 @@ export function postImageTC(
     // } else {
     //   progressLoadState(dispatch, image.id, FileLoadState.uploadFailed);
     // }
+  };
+}
+
+function mapDefinedTagToStr(tag: DefinedTag): string
+{
+  return tag.tagName;
+}
+
+export function putAlbumHeadersTC(): ThunkAction<
+  Promise<ApiMessage | null>,
+  RootState,
+  undefined,
+  SliceActions<typeof albumSlice.actions>
+>
+{
+  return async function (dispatch: AppDispatch, getState: () => RootState): Promise<ApiMessage | null>
+  {
+    const { id, albumName, tags } = getState().album.albumData;
+    dispatch(albumSlice.actions.setUnsavedChanges(ChangesSaveState.Saving));
+    const response = await putAlbumHeaders(id, albumName, tags.map(mapDefinedTagToStr));
+    if (response.rc >= 400 || response.rc < 200)
+    {
+      dispatch(albumSlice.actions.setUnsavedChanges(ChangesSaveState.Unsaved));
+    }
+    else
+    {
+      dispatch(albumSlice.actions.setUnsavedChanges(ChangesSaveState.Saved));
+    }
+    return response.data;
   };
 }
 
@@ -183,5 +237,9 @@ export const {
   setCurrentViewId,
   updateSnapLoadState,
   updateImageLoadState,
-  setAlbumIsFetching
+  setAlbumIsFetching,
+  setUnsavedChanges,
+  setAlbumTags,
+  pushNewAlbumTag,
+  setAlbumName
 } = albumSlice.actions;

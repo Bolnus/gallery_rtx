@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import classes from "./modal.module.scss";
+import classes from "./Modal.module.scss";
 import { onCallbackExec } from "../../utils/commonUtils";
 
 export enum ModalType {

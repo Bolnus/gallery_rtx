@@ -10,7 +10,15 @@ import { Pagination } from "./Pagination";
 import { DEFAULT_PAGE_SIZE } from "../../../utils/localStorageUtils";
 import { SelectOption } from "../../../utils/commonTypes";
 import { DefinedTag } from "../../../api/apiTypes";
-import { mapOptionToLabel, mapValueToOption, resetScrollOnBlur, setStateOnInputChange } from "../../../utils/commonUtils";
+import {
+  mapDefinedTagsToOptions,
+  mapOptionToLabel,
+  mapValueToOption,
+  resetScrollOnBlur,
+  setStateOnInputChange
+} from "../../../utils/commonUtils";
+import { TextInput } from "../../controls/TextInput";
+import { SkeletonLoader } from "../../Pixmaps/SkeletonLoader/SkeletonLoader";
 
 const halfClientPageSize = 2;
 const PAGE_PARAM = "page";
@@ -56,29 +64,14 @@ function scrollToDiv(divBlock: HTMLDivElement | null, smooth = false)
   }
 }
 
-function mapDefinedTagsToOptions(definedTag: DefinedTag): SelectOption
-{
-  return {
-    value: definedTag.id,
-    label: definedTag.tagName
-  };
-}
-
 function changeSearchName(
   setSearchName: (str: string) => void,
   setPageNumber: (newPage: number) => void,
-  localEvent: React.FormEvent
+  newValue: string
 )
 {
-  localEvent.preventDefault();
-  const inputElement = localEvent.target as HTMLInputElement;
   setPageNumber(1);
-  setSearchName(inputElement.value);
-}
-
-function clearSearchName(setSearchName: (str: string) => void)
-{
-  setSearchName("");
+  setSearchName(newValue);
 }
 
 export function AlbumsList({ isSearch }: AlbumListProps)
@@ -195,7 +188,7 @@ export function AlbumsList({ isSearch }: AlbumListProps)
   React.useEffect(function()
   {
     dispatch(getSearchTagsTC());
-  }, []);
+  }, [dispatch]);
 
   /** Update query params based on state variables */
   React.useEffect(function()
@@ -228,9 +221,12 @@ export function AlbumsList({ isSearch }: AlbumListProps)
   const onPageSelect = React.useCallback(function(newPage: number)
   {
     setPageNumber(newPage);
-    dispatch(setIsFetching(true));
+    if (newPage !== pageNumber)
+    {
+      dispatch(setIsFetching(true));
+    }
     listBoxRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-  }, [setPageNumber]);
+  }, [setPageNumber, dispatch, listBoxRef, pageNumber]);
 
   const albumBlockComponents = albums.map(
     mapAlbumToBlock.bind(null, scrollAlbumBlockRef, currentAlbumId, scrollBlockNumber)
@@ -247,23 +243,12 @@ export function AlbumsList({ isSearch }: AlbumListProps)
       <div className={classes.scrollBox} ref={listBoxRef}>
         {isSearch ? (
           <div className={`${classes.searchBlock} ${classes.scrollBox_itemWrapper}`}>
-            <div className={`${classes.inputWrapper} ${classes.searchInput}`}>
-              <input
-                placeholder="Album name..."
-                onBlur={resetScrollOnBlur}
+            <div className={`${classes.inputWrapper}`}>
+              <TextInput
                 value={searchName}
                 onChange={changeSearchName.bind(null, setSearchName, setPageNumber)}
-                className={`${classes.searchInput__input} commonInput`}
+                isClearable
               />
-              <div className={classes.searchInput__indicatorContainer}>
-                <span className={classes.searchInput__spacer} />
-                <div
-                  onClick={clearSearchName.bind(null, setSearchName)}
-                  className={`${classes.searchInput__indicatorClose} emojiFont`}
-                >
-                  ❌
-                </div>
-              </div>
             </div>
             <Select
               options={searchTags.map(mapDefinedTagsToOptions)}
@@ -292,11 +277,17 @@ export function AlbumsList({ isSearch }: AlbumListProps)
         {albumBlockComponents}
         {albumBlockComponents?.length ? null : (
           <div
-            className={classes.albumBlock}
+            className={`${classes.albumBlock} ${classes.scrollBox_itemWrapper}`}
             // ref={taskBlockLoaderRef}
             key="last"
           >
-            <div className="emptyComment">Not found</div>
+            {isFetching ? (
+              <div>
+                <SkeletonLoader />
+              </div>
+            ) : (
+              <div className="emptyComment">Not found</div>
+            )}
           </div>
         )}
         {albums.length ? (
