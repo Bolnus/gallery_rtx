@@ -3,7 +3,7 @@
 This is a frontent part of Gallery project. Backend part lives [here](https://github.com/Bolnus/gallery_backend). 
 The app is used to display albums with images. The albums can be searched through their names and tags. Images can be viewed in full page mode one by one. Albums tags and headers can be edited.
 
-This is a `create react app` project which is written with `typescript`. `Redux toolkit` is used as state manager.
+This is a `create react app` project written with `typescript`. `Redux toolkit` is used as state manager.
 
 ### Desktop resolution preview
 
