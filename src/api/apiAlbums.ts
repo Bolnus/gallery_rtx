@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Album, FileLoadState, GalleryImage } from "../redux/features/albumsList/albumsListTypes";
 import { ApiAlbum, AlbumWithImages, AlbumsListWithTotal, ApiAlbumsWithTotal, ApiResponse, DefinedTag, ApiTag, ApiMessage } from "./apiTypes";
 
@@ -151,6 +151,11 @@ export async function getAllTags(): Promise<ApiResponse<DefinedTag[]>>
   }
 }
 
+function isApiError(localError: unknown): localError is AxiosError<ApiMessage>
+{
+  return !!(localError as AxiosError<ApiMessage>)?.response?.data?.message;
+}
+
 export async function putAlbumHeaders(
   id: string,
   albumName: string,
@@ -173,9 +178,19 @@ export async function putAlbumHeaders(
   catch (error: any) 
   {
     handleResponseError(error, path);
+    if (isApiError(error))
+    {
+      return {
+        rc: Number(error?.response?.status),
+        data: error?.response?.data as ApiMessage
+      };
+    }
     return {
       rc: Number(error?.response?.status),
-      data: error?.response?.data as ApiMessage
+      data: {
+        message: error?.response?.data as string,
+        title: error?.response?.code as string
+      }
     };
   }
 }

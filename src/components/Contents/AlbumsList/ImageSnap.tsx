@@ -34,13 +34,13 @@ function onSnapImageError(dispatch: AppDispatch, galleryImage: GalleryImage, alb
 
 export function ImageSnap({ element, albumId }: OwnProps) 
 {
-  const [imageUrl, setImageUrl] = React.useState<string>();
   const dispatch = useAppDispatch();
+  // const [imageUrl, setImageUrl] = React.useState<string>();
 
-  React.useLayoutEffect(function()
-  {
-    setImageUrl(element?.url);
-  }, [element?.url]);
+  // React.useLayoutEffect(function()
+  // {
+  //   setImageUrl(element?.url);
+  // }, [element?.url]);
 
   let imgContents: null | JSX.Element = null;
 
@@ -74,7 +74,7 @@ export function ImageSnap({ element, albumId }: OwnProps)
           className={`${classes.galleryGrid__image} ${classes.galleryGrid__image_geometry}`}
           alt={element.name}
           onError={onSnapImageError.bind(null, dispatch, element, albumId)}
-          src={imageUrl}
+          src={element.url}
           loading="lazy"
         />
       </div>

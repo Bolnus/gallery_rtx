@@ -41,12 +41,12 @@ export function GridImage({ element }: OwnProps)
 {
   const dispatch = useAppDispatch();
   const [abortController, setAbortController] = React.useState(new AbortController());
-  const [imageUrl, setImageUrl] = React.useState<string>();
+  // const [imageUrl, setImageUrl] = React.useState<string>();
 
-  React.useLayoutEffect(function()
-  {
-    setImageUrl(element?.url);
-  }, [element?.url]);
+  // React.useLayoutEffect(function()
+  // {
+  //   setImageUrl(element?.url);
+  // }, [element?.url]);
 
   React.useEffect(
     function () 
@@ -98,7 +98,7 @@ export function GridImage({ element }: OwnProps)
           className={`${classes.galleryGrid__image} ${classes.galleryGrid__image_geometry}`}
           alt={element.name}
           onError={onSnapImageError.bind(null, dispatch, element)}
-          src={imageUrl}
+          src={element.url}
           onClick={(valueDispatch<string>).bind(null, dispatch, setCurrentViewId, element.id)}
           loading="lazy"
         />

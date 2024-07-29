@@ -1,4 +1,4 @@
-import React, { ChangeEvent, KeyboardEvent, KeyboardEventHandler } from "react";
+import React, { ChangeEvent, KeyboardEvent } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSearchParams } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
@@ -14,7 +14,7 @@ import {
 } from "../../../utils/commonUtils";
 import { FileLoadState, GalleryImage } from "../../../redux/features/albumsList/albumsListTypes";
 import { AppDispatch } from "../../../redux/reduxStore";
-import { useAppDispatch, useTypedSelector } from "../../../utils/hooks";
+import { useAppDispatch, useIntersectionObserver, useTypedSelector } from "../../../utils/hooks";
 import { SkeletonLoader } from "../../Pixmaps/SkeletonLoader/SkeletonLoader";
 import {
   getAlbumTC,
@@ -30,6 +30,8 @@ import { ApiMessage, DefinedTag } from "../../../api/apiTypes";
 import { getSearchTagsTC } from "../../../redux/features/albumsList/albumsListSlice";
 import { ChangesSaveState } from "../../../redux/features/album/albumTypes";
 import { TextInput } from "../../controls/TextInput";
+import { onImageError } from "./utils";
+import { AlbumCover } from "./AlbumCover";
 
 // export interface StateProps {
 //   currentTaskNumber: number;
@@ -102,14 +104,6 @@ function mapLoaders(loaderId: string): JSX.Element
   );
 }
 
-function onImageError(dispatch: AppDispatch, galleryImage: GalleryImage)
-{
-  dispatch(updateImageLoadState({
-    ...galleryImage,
-    loadState: FileLoadState.parsingFailed
-  }));
-}
-
 function handleKeyDown(
   inputValue: string,
   selectedTags: SelectOption[],
@@ -176,12 +170,11 @@ export function Album()
   const [searchParams] = useSearchParams();
   // const [modalVisible, setModalVisible] = React.useState(false);
   const unsavedChanges = useTypedSelector((state) => state.album.unsavedChanges);
-  // const [loaderIds, setLoaderIds] = React.useState<string[]>([]);
+  const [localImages, setLocalImages] = React.useState<GalleryImage[]>([]);
   const [errorMessage, setErrorMessage] = React.useState<ApiMessage | null>(null);
   const [isOnEdit, setIsOnEdit] = React.useState(false);
-  
-  let pageContents: JSX.Element;
-  let albumCover: JSX.Element;
+  const imagesLoaderRef = React.useRef<HTMLDivElement>(null);
+  const loaderIntersected = useIntersectionObserver(imagesLoaderRef, { root: document.body });
 
   React.useEffect(function ()
   {
@@ -198,15 +191,32 @@ export function Album()
     dispatch(getSearchTagsTC());
   }, [dispatch]);
 
-  // React.useEffect(function()
-  // {
-  //   const initialLoaderIds: string[] = [];
-  //   for (let i = 0; i < 50; i++)
-  //   {
-  //     initialLoaderIds.push(String(i));
-  //   }
-  //   setLoaderIds(initialLoaderIds);
-  // }, []);
+  React.useEffect(function()
+  {
+    if (loaderIntersected)
+    {
+      setLocalImages(function(prevState: GalleryImage[])
+      {
+        if (images.length <= prevState.length)
+        {
+          return prevState;
+        }
+        const newLocalImages = [...prevState];
+        for (let i = prevState.length; i < prevState.length + 35; i++)
+        {
+          if (images?.[i])
+          {
+            newLocalImages.push(images?.[i]);
+          }
+          else
+          {
+            break;
+          }
+        }
+        return newLocalImages;
+      });
+    }
+  }, [images, loaderIntersected]);
 
   React.useEffect(function()
   {
@@ -215,42 +225,15 @@ export function Album()
       dispatch(setUnsavedChanges(ChangesSaveState.Saved));
     };
   }, []);
-  
-  if (isFetching || images.length) 
-  {
-    pageContents = (
-      <div className={classes.galleryGrid}>
-        {images.map(mapImages)}
-      </div>
-    );
-    albumCover = isFetching || imageCover.loadState === FileLoadState.parsingFailed ? (
-      <div className={classes.galleryHeader__backgroundImage}>
-        <SkeletonLoader />
-      </div>
-    ) : (
-      <img
-        src={imageCover?.url}
-        alt={imageCover?.name}
-        className={`${classes.galleryHeader__backgroundImage} ${classes.galleryHeader__backgroundImage_appearence}`}
-        onError={onImageError.bind(null, dispatch, imageCover)}
-      />
-    );
-  }
-  else
-  {
-    pageContents = <div className="emptyComment">404 Not found</div>;
-    albumCover = (
-      <div className={classes.galleryHeader__backgroundImage}>
-        <SkeletonLoader />
-      </div>
-    );
-  }
 
   return (
     <div className={classes.galleryPage}>
       <div className={classes.scrollWrapper}>
         <div className={classes.galleryHeader}>
-          {albumCover}
+          <AlbumCover
+            imageCover={imageCover}
+            isFetching={isFetching || imageCover?.loadState === FileLoadState.parsingFailed || !images.length}
+          />
           {isOnEdit ? (
             <div className={classes.galleryHeader__leftContent}>
               <TextInput
@@ -324,7 +307,22 @@ export function Album()
             // onKeyDown={handleKeyDown.bind(null, inputValue, selectedTags, setSelectedTags, setInputValue)}
             isDisabled={!isOnEdit}
           />
-          {pageContents}
+          {isFetching || images.length ? (
+            <div className={classes.galleryGrid}>
+              {localImages.map(mapImages)}
+              {images.length > localImages.length ? (
+                <div key="last" className={classes.galleryGrid__imageWrapper} ref={imagesLoaderRef}>
+                  <div className={classes.galleryGrid__imageWrapper}>
+                    <div className={classes.galleryGrid__loaderWrapper}>
+                      <SkeletonLoader isSharp />
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="emptyComment">404 Not found</div>
+          )}
         </div>
       </div>
       {errorMessage ? (

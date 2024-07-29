@@ -121,6 +121,7 @@ module.exports = {
     "no-param-reassign": "off",
     "operator-assignment": "off",
     "no-debugger": "warn",
+    "no-await-in-loop": "off",
     "@typescript-eslint/naming-convention": [
       "error",
       {
