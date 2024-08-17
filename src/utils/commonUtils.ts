@@ -1,13 +1,27 @@
-import React from "react";
+import React, { FocusEvent } from "react";
+import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 import { UnknownAction } from "redux";
 import { AppDispatch } from "../redux/reduxStore";
 import { SelectOption } from "./commonTypes";
 import { DefinedTag } from "../api/apiTypes";
-import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 
-export function resetScrollOnBlur() 
+function resetScroll()
 {
-  window.scrollTo(0, 0);
+  // window.scrollTo({ top: 0, left: 0 });
+  // window.scrollY = 0;
+  // if (document.scrollingElement?.scrollTop)
+  // {
+  //   document.scrollingElement.scrollTop = 0;
+  // }
+  window.scroll({ top: 0, left: 0 });
+}
+
+export function resetScrollOnBlur()
+{
+  // localEvent: FocusEvent<HTMLInputElement>
+  // localEvent.preventDefault();
+  resetScroll();
+  // setTimeout(resetScroll, 100);
 }
 
 function addDays(date: Date, days: number): Date 
@@ -29,17 +43,11 @@ export function getUpcomingDate(): string
   );
 }
 
-export function onFocusIn(getCatalog: Function, catalogLoaded: boolean) 
-{
-  if (!catalogLoaded) {
-    getCatalog();
-  }
-}
-
 export function toUnsigned(text: string): number 
 {
   const digitArray: RegExpMatchArray | null = text.match(/^\d+$/);
-  if (digitArray) {
+  if (digitArray)
+  {
     return +digitArray.join();
   }
   return 0;

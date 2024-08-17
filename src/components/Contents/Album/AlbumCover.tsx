@@ -4,6 +4,7 @@ import classes from "./album.module.scss";
 import { GalleryImage } from "../../../redux/features/albumsList/albumsListTypes";
 import { onImageError } from "./utils";
 import { useAppDispatch } from "../../../utils/hooks";
+import { resetScrollOnBlur } from "../../../utils/commonUtils";
 
 interface AlbumCoverProps
 {
@@ -25,6 +26,7 @@ export function AlbumCover({ isFetching, imageCover }: AlbumCoverProps): JSX.Ele
       alt={imageCover?.name}
       className={`${classes.galleryHeader__backgroundImage} ${classes.galleryHeader__backgroundImage_appearence}`}
       onError={onImageError.bind(null, dispatch, imageCover)}
+      onClick={resetScrollOnBlur}
     />
   );
 }

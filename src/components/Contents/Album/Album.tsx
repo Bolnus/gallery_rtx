@@ -269,6 +269,7 @@ export function Album()
                       accept="image/*"
                       // value={props.fileName}
                       onChange={onFileInputChanged.bind(null, dispatch)}
+                      onBlur={resetScrollOnBlur}
                     />
                     <span
                       className={`${classes.toolBar__button} ${classes.toolBar__button_isIcon} pushButton emojiFont`}
