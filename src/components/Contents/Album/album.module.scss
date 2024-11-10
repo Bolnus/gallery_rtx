@@ -95,14 +95,6 @@
     }
 }
 
-.section__infoHeader
-{
-    display: block;
-    font-size: calc(var(--fontSizeMedium) - 4px);
-    font-weight: normal;
-    color: var(--fontColorLight); //var(--fontColorFirm);
-}
-
 .toolBar
 {
     z-index: 2;

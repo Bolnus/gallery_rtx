@@ -59,8 +59,11 @@ export const AlbumListItem = React.forwardRef(function (
         <div
           // onClick={onAlbumClicked.bind(null, album.id)}
           ref={ref}
-          className={`${classes.albumBlock}       
-      ${isCurrent ? classes.albumBlock_current : ""}`}
+          className={`${
+            classes.albumBlock
+          } ${
+            isCurrent ? classes.albumBlock_current : ""
+          }`}
         >
           <div className={classes.albumBlock__picturesSnap}>
             {album.picturesSnap.map(mapImages.bind(null, album.id))}

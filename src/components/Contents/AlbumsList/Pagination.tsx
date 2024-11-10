@@ -24,7 +24,11 @@ function mapPaginationButtons(
       key={index}
       className={`${classes.paginationButtonsBlock__button} 
       pushButton 
-      ${selected === element ? classes.paginationButtonsBlock__button_selected : classes.paginationButtonsBlock__button_common}`}
+      ${
+    selected === element
+      ? classes.paginationButtonsBlock__button_selected
+      : classes.paginationButtonsBlock__button_common
+    }`}
       onClick={onPageClicked.bind(null, element)}
     >
       {element}

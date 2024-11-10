@@ -1,6 +1,15 @@
 import axios, { AxiosError } from "axios";
 import { Album, FileLoadState, GalleryImage } from "../redux/features/albumsList/albumsListTypes";
-import { ApiAlbum, AlbumWithImages, AlbumsListWithTotal, ApiAlbumsWithTotal, ApiResponse, DefinedTag, ApiTag, ApiMessage } from "./apiTypes";
+import {
+  ApiAlbum,
+  AlbumWithImages,
+  AlbumsListWithTotal,
+  ApiAlbumsWithTotal,
+  ApiResponse,
+  DefinedTag,
+  ApiTag,
+  ApiMessage
+} from "./apiTypes";
 
 const baseURL = `${window.location.protocol}//${window.location.hostname}:${process.env.REACT_APP_PROXY_PORT || ""}`;
 const axiosClient = axios.create({

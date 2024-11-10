@@ -92,5 +92,10 @@ SliceActions<typeof albumsListSlice.actions>
   };
 }
 
-export const { setSearchString, setIsFetching, setAlbums, updateAlbumSnapLoadState, setSearchTags } =
-  albumsListSlice.actions;
+export const {
+  setSearchString,
+  setIsFetching,
+  setAlbums,
+  updateAlbumSnapLoadState,
+  setSearchTags
+} = albumsListSlice.actions;
